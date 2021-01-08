@@ -1,0 +1,43 @@
+html {
+  .App{
+
+  }
+  .books-list {
+    height: auto;
+    width: 280px;
+    overflow: auto;
+    background-color: white;
+
+    .books-list-item {
+      border: 1px darkgrey solid;
+      cursor: pointer;
+      border-radius: 3px;
+      margin: 1px;
+
+      &.selected{
+          background-color: antiquewhite;
+      }
+
+      &:hover {
+        background-color: antiquewhite;
+      }
+
+      .book {
+        margin-left: 1rem;
+        height: 26px;
+        font-size: 21px;
+      }
+
+      .progress {
+        height: 7px;
+        background-color: cornflowerblue;
+      }
+
+      .translation {
+        height: 7px;
+        background-color: darkseagreen;
+      }
+    }
+
+  }
+}

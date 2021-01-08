@@ -1,25 +1,37 @@
-import logo from './logo.svg';
-import './App.css';
+import {useEffect, useState} from "react";
+import './index.scss';
+import {BookList} from "./BookList";
+import {Book} from "./Book";
+import {addNewBook} from "./utils";
+
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+
+    const [selected, setSelected] = useState(null)
+
+    useEffect(() => {
+        onDrop(newBook => addNewBook(newBook))
+    }, [])
+
+    return <div className="App">
+        <BookList onSelect={info => setSelected(info)}/>
+        <Book selected={selected}/>
     </div>
-  );
+
 }
 
 export default App;
+
+function onDrop(addBook) {
+    document.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    });
+    document.addEventListener('drop', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        for (const {name, path} of event.dataTransfer.files) {
+            addBook({name, path})
+        }
+    });
+}
