@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import Db from "./db";
+import {db} from "../db";
 
 export const Book = ({selected}) => {
 
@@ -13,7 +13,7 @@ export const Book = ({selected}) => {
     }, [selected])
 
     useEffect(() => {
-        selected && selected.book && Db.getBookRow(selected.book, row)
+        selected && selected.book && db.getBookRow(selected.book, row)
             .then(({text}) => setText(text))
     }, [selected, row])
 

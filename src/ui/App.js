@@ -1,7 +1,7 @@
 import {useState} from "react";
 import '../index.scss';
+import {Book} from "./Book";
 import {BookList} from "./BookList";
-import {Book} from "../Book";
 
 
 function App() {

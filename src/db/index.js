@@ -1,48 +1,18 @@
-let db = undefined
+let instance = undefined
 
-export default class Db {
-    static async init() {
+class Db {
 
-        console.log(new Date(), 'init db')
-
-        const request = window.indexedDB.open('books', 2);
-
-        return new Promise((resolve, reject) => {
-            request.onsuccess = function () {
-                resolve('Database opened successfully');
-                db = request.result;
-            }
-            request.onupgradeneeded = function (e) {
-                db = e.target.result;
-
-                db.createObjectStore('book_text', {keyPath: ['book', 'row']});
-                db.createObjectStore('book_info', {keyPath: 'book'});
-
-                resolve('Database setup complete');
-            };
-
-            request.onerror = function () {
-                reject('Database failed to open');
-            };
-        })
-    }
-
-    static async addBook(book, bookText) {
-        if (db === undefined) await Db.init()
-
+    async addBook(book, bookText) {
         return Promise.all([
-            addBookInfo(book, bookText.length),
+            putBookInfo({book, rows: bookText.length, row: 0, translateRow: 0}),
             addBookText(book, bookText)
         ])
     }
 
-    static async getBooks() {
+    async getBooks(book = undefined) {
+        const objectStore = instance.transaction('book_info').objectStore('book_info');
 
-        if (db === undefined) await Db.init()
-
-        const objectStore = db.transaction('book_info').objectStore('book_info');
-
-        const request = objectStore.getAll()
+        const request = objectStore.getAll(book)
 
         return new Promise((resolve, reject) => {
             request.onsuccess = function (e) {
@@ -57,10 +27,8 @@ export default class Db {
         })
     }
 
-    static async getBookRow(book, row){
-        if (db === undefined) await Db.init()
-
-        const objectStore = db.transaction('book_text').objectStore('book_text');
+    async getBookRow(book, row) {
+        const objectStore = instance.transaction('book_text').objectStore('book_text');
 
         const request = objectStore.get([book, row])
 
@@ -73,10 +41,31 @@ export default class Db {
             };
         })
     }
+
+    async putBookRow({book, row, text, translation}) {
+        await putBookRow({book, row, text, translation})
+        await putBookInfo({book, translateRow: row})
+    }
+}
+
+async function putBookRow({book, row, text, translation}) {
+    const transaction = instance.transaction(['book_text'], 'readwrite');
+    const objectStore = transaction.objectStore('book_text');
+
+    objectStore.put({book, row, text, translation});
+
+    return new Promise((resolve, reject) => {
+        transaction.oncomplete = function () {
+            resolve('done')
+        };
+        transaction.onerror = function (e) {
+            reject(e)
+        };
+    })
 }
 
 async function addBookText(book, bookText) {
-    const transaction = db.transaction(['book_text'], 'readwrite');
+    const transaction = instance.transaction(['book_text'], 'readwrite');
     const objectStore = transaction.objectStore('book_text');
 
     bookText.forEach((text, row) => {
@@ -93,11 +82,13 @@ async function addBookText(book, bookText) {
     })
 }
 
-async function addBookInfo(book, rows) {
-    const transaction = db.transaction(['book_info'], 'readwrite');
+async function putBookInfo(info) {
+    const transaction = instance.transaction(['book_info'], 'readwrite');
     const objectStore = transaction.objectStore('book_info');
 
-    objectStore.add({book, rows, row: 0, translateRows: 0, translateRow: 0})
+    const bookInfo = objectStore.get(info.book)
+
+    objectStore.put({...bookInfo, ...info})
 
     return new Promise((resolve, reject) => {
         transaction.oncomplete = function () {
@@ -109,3 +100,34 @@ async function addBookInfo(book, rows) {
     })
 
 }
+
+async function init() {
+    const request = window.indexedDB.open('books', 2);
+    return new Promise((resolve, reject) => {
+        request.onsuccess = function () {
+            resolve('Database opened successfully');
+            instance = request.result;
+        }
+        request.onupgradeneeded = function (e) {
+            instance = e.target.result;
+
+            instance.createObjectStore('book_text', {keyPath: ['book', 'row']});
+            instance.createObjectStore('book_info', {keyPath: 'book'});
+
+            resolve('Database setup complete');
+        };
+        request.onerror = function () {
+            reject('Database failed to open');
+        };
+    })
+}
+
+Object.getOwnPropertyNames(Db.prototype).forEach((name) => {
+    const method = Db.prototype[name];
+    Db.prototype[name] = async function () {
+        if (instance === undefined) await init()
+        return method(...arguments)
+    };
+});
+
+export const db = new Db()

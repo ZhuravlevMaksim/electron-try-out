@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import Db from "../db";
+import {db} from "../db";
 
 const {ipcRenderer} = window.require('electron');
 
@@ -8,22 +8,40 @@ export const BookList = ({onSelect}) => {
 
     const [selected, setSelected] = useState({})
     const [books, setBooks] = useState({})
+    const [translateBookList, setTranslate] = useState({})
 
     const prepareNewBook = (book) => {
         const bookNoText = {...book, text: null}
         setBooks({...books, [book.book]: bookNoText})
         if (book.text) {
-            Db.addBook(book.book, book.text)
+            db.addBook(book.book, book.text)
                 .then(e => setBooks({...books, [book.book]: bookNoText}))
                 .catch(e => console.log('e', e))
         }
     }
 
     useEffect(() => {
-        Db.getBooks()
+        db.getBooks()
             .then(books => setBooks(books))
             .catch(e => console.log(e))
     }, [])
+
+    useEffect(() => {
+        const toTranslate = Object.keys(translateBookList).filter(key => translateBookList[key]).map(key => books[key])
+        if (toTranslate.length) {
+            toTranslate.forEach(book => sendAsyncTranslate(book))
+        }
+    }, [books, translateBookList])
+
+    useEffect(() => {
+        console.log(books)
+        return receiveTranslated(book => {
+            console.log(book)
+            setBooks({
+                ...books, [book.book]: {...books[book.book], translateRow: book.row + 1}
+            })
+        })
+    }, [books, translateBookList])
 
     useEffect(() => {
         return onDrop(newBook => addNewBook(newBook))
@@ -39,29 +57,32 @@ export const BookList = ({onSelect}) => {
 
     return books ? <div className="books-list">
         {
-            Object.values(books).map(info => <ListRow key={info.book}
-                                                      selected={selected.book}
-                                                      info={info}
-                                                      onCLick={() => setSelected(info)}/>)
+            Object.values(books).map((info) => {
+                const {book, page, total, translate, state} = info
+                const pending = state === 'pending'
+                const isSelected = selected.book === book
+                return <div>
+                    <div onClick={() => setSelected(info)}
+                         style={pending ? {backgroundColor: 'gray', opacity: 0.5} : null}
+                         className={isSelected ? 'books-list-item selected' : 'books-list-item'}>
+                        <div className="book">{book}</div>
+                        <div className="progress" style={{width: total ? 100 / total * page : 0}}/>
+                        <div className="translation" style={{width: total ? 100 / total * translate : 0}}/>
+                    </div>
+                    <div style={{marginTop: '1rem'}}>
+                        {pending ? <button>pending...</button> : null}
+                        <button style={{marginRight: 5}} onClick={e => {
+                            const isTranslation = translateBookList[book] || false
+                            setTranslate({...translateBookList, [book]: !isTranslation})
+                        }}>
+                            {translateBookList[book] ? 'translating...' : 'translate'}
+                        </button>
+                        <button style={{marginLeft: 'auto'}}>remove</button>
+                    </div>
+                </div>
+            })
         }
     </div> : null
-}
-
-const ListRow = ({
-                     selected,
-                     info: {book, page, total, translate, state},
-                     onCLick
-                 }) => {
-    const pending = state === 'pending'
-    return <div onClick={onCLick} style={pending ? {backgroundColor: 'gray', opacity: 0.5} : null}
-                className={selected === book ? 'books-list-item selected' : 'books-list-item'}>
-        <div className="book">{book}</div>
-        <div className="progress" style={{width: total ? 100 / total * page : 0}}/>
-        <div className="translation" style={{width: total ? 100 / total * translate : 0}}/>
-        {pending ? <div>pending...</div> : null}
-        <div>remove</div>
-        <div>translate</div>
-    </div>
 }
 
 function onDrop(addBook) {
@@ -96,4 +117,21 @@ function onNewBookAdded(onAdd) {
     const listener = (event, args) => onAdd(args)
     ipcRenderer.on('add-book', listener)
     return () => ipcRenderer.removeListener('add-book', listener)
+}
+
+// {book, rows: bookText.length, row: 0, translateRow: -1}
+function sendAsyncTranslate({book, translateRow}) {
+    console.log("send " + translateRow)
+    db.getBookRow(book, translateRow).then(row => ipcRenderer.send('translate', row)) // book row text
+}
+
+function receiveTranslated(onReceive) {
+    const listener = (event, args) => onReceive(args)
+    ipcRenderer.on('translate', listener)
+    return () => ipcRenderer.removeListener('translate', listener)
+}
+
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }

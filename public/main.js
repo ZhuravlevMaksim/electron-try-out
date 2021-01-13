@@ -52,9 +52,9 @@ function getPdfText(filename, callback) {
 
 const translate = require("@vitalets/google-translate-api");
 
-ipcMain.on('translate', async (event, arg) => {
-    const {text} = await translate(arg, {client: 'gtx', to: 'ru'})
-    event.reply('translate', text)
+ipcMain.on('translate', async (event, {book, row, text: forTranslation}) => {
+    const {text} = await translate(forTranslation, {client: 'gtx', to: 'ru'})
+    event.reply('translate', {book, row, text})
 })
 
 
