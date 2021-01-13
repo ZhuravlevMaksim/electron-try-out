@@ -1,28 +1,28 @@
 import {useEffect, useState} from "react";
-import {getBook} from "./utils";
+import Db from "./db";
 
 export const Book = ({selected}) => {
 
-    const [book, setBook] = useState(null)
-    const [row, setRow] = useState(0)
+    const [row, setRow] = useState(500)
+    const [text, setText] = useState('')
 
     useEffect(() => {
-        selected && getBook(selected.book).then(e => {
-            setBook(e)
-            setRow(selected.page)
-        })
+        if (selected && selected.book) {
+            selected.row !== undefined && setRow(selected.row)
+        }
     }, [selected])
 
     useEffect(() => {
+        selected && selected.book && Db.getBookRow(selected.book, row)
+            .then(({text}) => setText(text))
+    }, [selected, row])
 
-    }, [book])
-
-    return selected && book ? <div className="book">
+    return selected ? <div className="book">
         <h1>{selected.book}</h1>
-        <div>{book.book[row]}</div>
+        <div>{text}</div>
         <div>
-            <button onClick={() => setRow(row - 1)}>next</button>
-            <button onClick={() => setRow(row + 1)}>prev</button>
+            <button onClick={() => setRow(row - 1)}>prev</button>
+            <button onClick={() => setRow(row + 1)}>next</button>
         </div>
     </div> : null
 

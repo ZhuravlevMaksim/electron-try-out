@@ -1,5 +1,8 @@
 import {useEffect, useState} from "react";
-import {getBooks, onNewBookAdded} from "./utils";
+import Db from "../db";
+
+const {ipcRenderer} = window.require('electron');
+
 
 export const BookList = ({onSelect}) => {
 
@@ -7,16 +10,23 @@ export const BookList = ({onSelect}) => {
     const [books, setBooks] = useState({})
 
     const prepareNewBook = (book) => {
-        setBooks({...books, [book.book]: book})
+        const bookNoText = {...book, text: null}
+        setBooks({...books, [book.book]: bookNoText})
+        if (book.text) {
+            Db.addBook(book.book, book.text)
+                .then(e => setBooks({...books, [book.book]: bookNoText}))
+                .catch(e => console.log('e', e))
+        }
     }
 
     useEffect(() => {
-        getBooks().then(books => {
-            setBooks(books.reduce((acc, book) => {
-                acc[book.book] = book
-                return acc
-            }, {}))
-        })
+        Db.getBooks()
+            .then(books => setBooks(books))
+            .catch(e => console.log(e))
+    }, [])
+
+    useEffect(() => {
+        return onDrop(newBook => addNewBook(newBook))
     }, [])
 
     useEffect(() => {
@@ -42,7 +52,6 @@ const ListRow = ({
                      info: {book, page, total, translate, state},
                      onCLick
                  }) => {
-
     const pending = state === 'pending'
     return <div onClick={onCLick} style={pending ? {backgroundColor: 'gray', opacity: 0.5} : null}
                 className={selected === book ? 'books-list-item selected' : 'books-list-item'}>
@@ -53,4 +62,38 @@ const ListRow = ({
         <div>remove</div>
         <div>translate</div>
     </div>
+}
+
+function onDrop(addBook) {
+
+    const dragover = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    const drop = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        for (const {name, path} of event.dataTransfer.files) {
+            addBook({name, path})
+        }
+    }
+
+    document.addEventListener('dragover', dragover);
+    document.addEventListener('drop', drop);
+
+    return () => {
+        document.removeEventListener('dragover', dragover)
+        document.removeEventListener('drop', drop)
+    }
+}
+
+function addNewBook(book) {
+    return ipcRenderer.send('add-book', book)
+}
+
+function onNewBookAdded(onAdd) {
+    const listener = (event, args) => onAdd(args)
+    ipcRenderer.on('add-book', listener)
+    return () => ipcRenderer.removeListener('add-book', listener)
 }
