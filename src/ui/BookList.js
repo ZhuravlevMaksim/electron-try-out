@@ -3,6 +3,7 @@ import {db} from "../db";
 import {useTranslate} from "../hook/useTranslate";
 import {useOnBookAdd} from "../hook/useOnBookAdd";
 import {useHistory} from "react-router-dom";
+import {Button} from "./Button";
 
 
 export const BookList = () => {
@@ -37,45 +38,39 @@ export const BookList = () => {
             Object.values(books).map((info) => {
                 const {book, rows, row, translateRow, state} = info
                 const pending = state === 'pending' || state === 'deleting'
-                return <div key={book}>
-                    <div onClick={() => history.push(`/book/${book}`)}
-                         className='books-list-item'
-
+                return <div key={book} className='books-list__row' onClick={() => history.push(`/book/${book}`)}>
+                    <div className='books-list__row__book'
                          style={pending ? {backgroundColor: 'gray', opacity: 0.5} : null}>
-                        <div className="book">{book}</div>
+                        <div className='books-list__row__book__name'>{book}</div>
                         {
                             pending ?
-                                <div className='books-list-item__info'>pending...</div> :
-                                <div className='books-list-item__info'>{`${rows} / ${row} / ${translateRow}`}</div>
+                                <div className='books-list__row__book__info'>pending...</div> :
+                                <div className='books-list__row__book__info'>{`${rows} / ${row} / ${translateRow}`}</div>
                         }
                     </div>
                     {
-                        pending ? null : <div style={{marginTop: '1rem'}}>
-                            <TranslateBtn book={book} translateBookList={translateBookList}
+                        pending ? null : <div>
+                            <TranslateBtn book={book}
+                                          translateBookList={translateBookList}
                                           setTranslate={setTranslate}/>
-                            <button style={{marginLeft: 'auto'}} onClick={() => removeBook(book)}>
+                            <Button onClick={() => removeBook(book)}>
                                 remove
-                            </button>
+                            </Button>
                         </div>
                     }
-
                 </div>
             })
         }
     </div> : null
 }
 
-const BookRow = (book) => {
-
-}
-
 const TranslateBtn = ({book, translateBookList, setTranslate}) => {
-    return <button style={{marginRight: 5}} onClick={e => {
+    return <Button style={{marginRight: 5}} onClick={e => {
         const isTranslation = translateBookList[book] || false
         setTranslate({...translateBookList, [book]: !isTranslation})
     }}>
         {translateBookList[book] ? 'translating...' : 'translate'}
-    </button>
+    </Button>
 }
 
 const BookTranslate = ({book, needTranslate}) => {

@@ -1,25 +1,26 @@
 import {useEffect, useState} from "react";
 import {db} from "../db";
 import {useHistory, useRouteMatch} from "react-router-dom";
+import {Button} from "./Button";
 
 export const Book = () => {
 
-    const [row, setRow] = useState(500)
-    const [text, setText] = useState('')
+    const [i, setIndex] = useState(500)
+    const [row, setRow] = useState(null)
 
     const {params: {name}} = useRouteMatch()
 
     useEffect(() => {
-        db.getBookRow(name, row).then(({text}) => setText(text))
-    }, [row])
+        db.getBookRow(name, i).then((row) => setRow(row))
+    }, [i])
 
-    return <div className="book">
-        <h1>{name}</h1>
-        <div>{text}</div>
-        <div>
-            <button onClick={() => setRow(row - 1)}>prev</button>
-            <button onClick={() => setRow(row + 1)}>next</button>
+    return row ? <div className="book">
+        <h3>{name}</h3>
+        <div>{row.text}</div>
+        <div className='book-row-navigation'>
+            <Button onClick={() => setIndex(i - 1)}>prev</Button>
+            <Button onClick={() => setIndex(i + 1)}>next</Button>
         </div>
-    </div>
+    </div> : null
 
 }

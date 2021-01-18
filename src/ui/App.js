@@ -4,6 +4,7 @@ import {Book} from "./Book";
 import {BookList} from "./BookList";
 
 import {Route, Switch, useHistory, useRouteMatch} from 'react-router-dom';
+import {Button} from "./Button";
 
 function App() {
 
@@ -20,7 +21,7 @@ function App() {
                 <BookList/>
             </Route>
             <Route path="/book/:name">
-                <button onClick={history.goBack}>back</button>
+                <Button onClick={history.goBack}>back</Button>
                 <Book/>
             </Route>
         </Switch>
