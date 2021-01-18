@@ -12,14 +12,23 @@ export const BookList = () => {
     const [translateBookList, setTranslate] = useState({})
     const newBook = useOnBookAdd()
 
+    const getBooks = () => db.getBooks()
+        .then(books => setBooks(books))
+        .catch(e => console.log(e))
+
+
+    const removeBook = (book) => {
+        setBooks({...books, [book]: {...books[book], state: 'deleting'}})
+        db.removeBook(book).then(() => {
+            getBooks()
+        })
+    }
+
     useEffect(() => {
-        db.getBooks()
-            .then(books => setBooks(books))
-            .catch(e => console.log(e))
+        getBooks()
     }, [])
 
     useEffect(() => {
-        newBook && console.log("newBook", newBook)
         newBook && setBooks({...books, [newBook.book]: newBook})
     }, [newBook])
 
@@ -27,11 +36,11 @@ export const BookList = () => {
         {
             Object.values(books).map((info) => {
                 const {book, rows, row, translateRow, state} = info
-                const pending = state === 'pending'
-                return <div>
+                const pending = state === 'pending' || state === 'deleting'
+                return <div key={book}>
                     <div onClick={() => history.push(`/book/${book}`)}
                          className='books-list-item'
-                         key={book}
+
                          style={pending ? {backgroundColor: 'gray', opacity: 0.5} : null}>
                         <div className="book">{book}</div>
                         {
@@ -40,10 +49,16 @@ export const BookList = () => {
                                 <div className='books-list-item__info'>{`${rows} / ${row} / ${translateRow}`}</div>
                         }
                     </div>
-                    <div style={{marginTop: '1rem'}}>
-                        <TranslateBtn book={book} translateBookList={translateBookList} setTranslate={setTranslate}/>
-                        <button style={{marginLeft: 'auto'}} onClick={() => db.removeBook(book)}>remove</button>
-                    </div>
+                    {
+                        pending ? null : <div style={{marginTop: '1rem'}}>
+                            <TranslateBtn book={book} translateBookList={translateBookList}
+                                          setTranslate={setTranslate}/>
+                            <button style={{marginLeft: 'auto'}} onClick={() => removeBook(book)}>
+                                remove
+                            </button>
+                        </div>
+                    }
+
                 </div>
             })
         }

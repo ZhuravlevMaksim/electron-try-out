@@ -89,10 +89,10 @@ async function remove(book) {
     }
 
     return new Promise((resolve, reject) => {
-        textStore.oncomplete = function (e) {
+        text.oncomplete = function (e) {
             resolve('done')
         };
-        textStore.onerror = function (e) {
+        text.onerror = function (e) {
             reject(e)
         };
     })
