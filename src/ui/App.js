@@ -1,16 +1,29 @@
-import {useState} from "react";
+import React, {useEffect} from "react";
 import '../index.scss';
 import {Book} from "./Book";
 import {BookList} from "./BookList";
 
+import {Route, Switch, useHistory, useRouteMatch} from 'react-router-dom';
 
 function App() {
 
-    const [selected, setSelected] = useState(null)
+    const history = useHistory()
+    const route = useRouteMatch()
+
+    useEffect(() => {
+        if (route.path === '/') history.push('/books')
+    }, [])
 
     return <div className="App">
-        <BookList onSelect={info => setSelected(info)}/>
-        <Book selected={selected}/>
+        <Switch>
+            <Route exec path="/books">
+                <BookList/>
+            </Route>
+            <Route path="/book/:name">
+                <button onClick={history.goBack}>back</button>
+                <Book/>
+            </Route>
+        </Switch>
     </div>
 }
 

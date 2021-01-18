@@ -9,6 +9,10 @@ class Db {
         ])
     }
 
+    async removeBook(book) {
+        return remove(book)
+    }
+
     async getBooks(book = undefined) {
         const objectStore = instance.transaction('book_info').objectStore('book_info');
 
@@ -59,6 +63,36 @@ async function putBookRow({book, row, text, translation}) {
             resolve('done')
         };
         transaction.onerror = function (e) {
+            reject(e)
+        };
+    })
+}
+
+async function remove(book) {
+    const text = instance.transaction(['book_text'], 'readwrite');
+    const info = instance.transaction(['book_info'], 'readwrite');
+    const textStore = text.objectStore('book_text');
+    const infoStore = info.objectStore('book_info');
+
+    infoStore.delete(book)
+
+    const request = textStore.openKeyCursor()
+
+    request.onsuccess = () => {
+        const cursor = request.result;
+        if (cursor) {
+            if (cursor.primaryKey[0] === book) {
+                textStore.delete(cursor.primaryKey)
+            }
+            cursor.continue();
+        }
+    }
+
+    return new Promise((resolve, reject) => {
+        textStore.oncomplete = function (e) {
+            resolve('done')
+        };
+        textStore.onerror = function (e) {
             reject(e)
         };
     })
