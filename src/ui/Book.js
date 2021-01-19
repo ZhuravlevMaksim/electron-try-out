@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import {db} from "../db";
-import {useHistory, useRouteMatch} from "react-router-dom";
+import {useRouteMatch} from "react-router-dom";
 import {Button} from "./Button";
 
 export const Book = () => {

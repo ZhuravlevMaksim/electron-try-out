@@ -10,13 +10,14 @@ export const BookList = () => {
 
     const history = useHistory()
     const [books, setBooks] = useState({})
-    const [translateBookList, setTranslate] = useState({})
     const newBook = useOnBookAdd()
+    const [translate, setTranslate] = useTranslate()
 
-    const getBooks = () => db.getBooks()
-        .then(books => setBooks(books))
-        .catch(e => console.log(e))
-
+    const getBooks = () => {
+        db.getBooks()
+            .then(books => setBooks(books))
+            .catch(e => console.log(e))
+    }
 
     const removeBook = (book) => {
         setBooks({...books, [book]: {...books[book], state: 'deleting'}})
@@ -35,23 +36,26 @@ export const BookList = () => {
 
     return books ? <div className="books-list">
         {
-            Object.values(books).map((info) => {
+            Object.values(books).filter(info => info.book !== undefined).map((info) => {
                 const {book, rows, row, translateRow, state} = info
                 const pending = state === 'pending' || state === 'deleting'
-                return <div key={book} className='books-list__row' onClick={() => history.push(`/book/${book}`)}>
+                return <div key={book} className='books-list__row'>
                     <div className='books-list__row__book'
+                         onClick={() => history.push(`/book/${book}`)}
                          style={pending ? {backgroundColor: 'gray', opacity: 0.5} : null}>
                         <div className='books-list__row__book__name'>{book}</div>
                         {
                             pending ?
                                 <div className='books-list__row__book__info'>pending...</div> :
-                                <div className='books-list__row__book__info'>{`${rows} / ${row} / ${translateRow}`}</div>
+                                <div className='books-list__row__book__info'>
+                                    {`${rows} / ${row} / ${translate[book] && translate[book].translateRow || translateRow}`}
+                                </div>
                         }
                     </div>
                     {
                         pending ? null : <div>
                             <TranslateBtn book={book}
-                                          translateBookList={translateBookList}
+                                          translateBookList={translate}
                                           setTranslate={setTranslate}/>
                             <Button onClick={() => removeBook(book)}>
                                 remove
@@ -65,33 +69,10 @@ export const BookList = () => {
 }
 
 const TranslateBtn = ({book, translateBookList, setTranslate}) => {
-    return <Button style={{marginRight: 5}} onClick={e => {
-        const isTranslation = translateBookList[book] || false
-        setTranslate({...translateBookList, [book]: !isTranslation})
+    const {translating = false, rows, translateRow} = translateBookList[book] || {}
+    return rows === undefined || rows !== translateRow ? <Button style={{marginRight: 5}} onClick={() => {
+        setTranslate({book, translating: !translating})
     }}>
-        {translateBookList[book] ? 'translating...' : 'translate'}
-    </Button>
-}
-
-const BookTranslate = ({book, needTranslate}) => {
-
-    const [sendAsyncTranslate, onReceive] = useTranslate()
-    const [translate, setTranslate] = useState(0)
-
-    useEffect(() => {
-        onReceive(e => {
-            console.log("in translate", e)
-        })
-    }, [])
-
-    useEffect(() => {
-        if (needTranslate) sendAsyncTranslate(book)
-    }, [needTranslate])
-
-    return <div className="translation" style={{width: book.rows ? 100 / book.rows * translate : 0}}/>
-
-    function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
+        {translating ? 'translating...' : 'translate'}
+    </Button> : null
 }
