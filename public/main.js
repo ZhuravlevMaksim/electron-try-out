@@ -52,13 +52,14 @@ function getPdfText(filename, callback) {
 
 const translate = require("@vitalets/google-translate-api");
 
-ipcMain.on('translate', async (event, {book, row, text: forTranslation}) => {
+ipcMain.on('translate', async (event, {book, row, text}) => {
+    console.log("main",  {book, row, text})
     try {
-        event.reply('translate', {book, row, text: forTranslation})
+        const {text: translation} = await translate(text, {client: 'gtx', to: 'en'})
+        event.reply('translate', {book, row, translation})
     } catch (e) {
-        event.reply('translate', {book, row, text: forTranslation, error: e.message})
+        event.reply('translate', {book, row, error: e.message})
     }
-    // const {text} = await translate(forTranslation, {client: 'gtx', to: 'ru'})
 })
 
 

@@ -17,6 +17,7 @@ export const Book = () => {
     return row ? <div className="book">
         <h3>{name}</h3>
         <div>{row.text}</div>
+        <div>{row.translation}</div>
         <div className='book-row-navigation'>
             <Button onClick={() => setIndex(i - 1)}>prev</Button>
             <Button onClick={() => setIndex(i + 1)}>next</Button>

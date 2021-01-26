@@ -34,15 +34,24 @@ const translator = new class {
         }
     }
 
-    private receive({book, row, text}) {
+    private receive({book, row, translation, error}) {
 
-        this.state[book] = {...this.state[book], translateRow: row + 1}
+        console.log({book, row, translation, error})
 
-        // console.log('receive', this.state[book])
+        if (error) {
+            console.error(error)
+            return
+        }
 
-        Object.values(this.observers).forEach((setter: any) => setter(this.translation))
+        if (translation) {
+            this.state[book] = {...this.state[book], translateRow: row + 1}
 
-        this.translate(book)
+            db.addTranslation({book, row, translation})
+
+            Object.values(this.observers).forEach((setter: any) => setter(this.translation))
+
+            this.translate(book)
+        }
     }
 
     get translation() {

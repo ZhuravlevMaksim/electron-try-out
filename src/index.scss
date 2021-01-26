@@ -42,13 +42,12 @@ html {
 
       }
     }
-
-
   }
 
   .book {
     .book-row-navigation {
       display: flex;
+      margin-top: 1rem;
 
       .button + .button {
         margin-left: 1rem;

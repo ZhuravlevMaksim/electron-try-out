@@ -4,7 +4,7 @@ class Db {
 
     async addBook(book, bookText) {
         return Promise.all([
-            putBookInfo({book, rows: bookText.length, row: 0, translateRow: 0}),
+            putInfo({book, rows: bookText.length, row: 0, translateRow: 0}),
             addBookText(book, bookText)
         ])
     }
@@ -46,26 +46,23 @@ class Db {
         })
     }
 
-    async putBookRow({book, row, text, translation}) {
-        await putBookRow({book, row, text, translation})
-        await putBookInfo({book, translateRow: row})
+    async addTranslation({book, row, translation}) {
+        await putRow({book, row, translation})
+        await putInfo({book, translateRow: row})
     }
+
 }
 
-async function putBookRow({book, row, text, translation}) {
-    const transaction = instance.transaction(['book_text'], 'readwrite');
+async function getBookRow(book, row) {
+    const transaction = instance.transaction(['book_text'], 'read');
     const objectStore = transaction.objectStore('book_text');
+    return promise(objectStore.get([book, row]))
+}
 
-    objectStore.put({book, row, text, translation});
-
-    return new Promise((resolve, reject) => {
-        transaction.oncomplete = function () {
-            resolve('done')
-        };
-        transaction.onerror = function (e) {
-            reject(e)
-        };
-    })
+async function getInfo(book) {
+    const transaction = instance.transaction(['book_info'], 'read');
+    const objectStore = transaction.objectStore('book_info');
+    return promise(objectStore.get(book))
 }
 
 async function remove(book) {
@@ -106,33 +103,32 @@ async function addBookText(book, bookText) {
         objectStore.add({book, row, text});
     })
 
-    return new Promise((resolve, reject) => {
-        transaction.oncomplete = function () {
-            resolve('done')
-        };
-        transaction.onerror = function (e) {
-            reject(e)
-        };
-    })
+    return promise(transaction)
 }
 
-async function putBookInfo(info) {
+async function putRow(row) {
+    const transaction = instance.transaction(['book_text'], 'readwrite');
+    const objectStore = transaction.objectStore('book_text');
+
+    const bookRow = await getBookRow(row.book, row.row)
+
+    console.log("bookRow", bookRow)
+
+    objectStore.put({...bookRow, ...row})
+    return promise(transaction)
+}
+
+async function putInfo(info) {
     const transaction = instance.transaction(['book_info'], 'readwrite');
     const objectStore = transaction.objectStore('book_info');
 
-    const bookInfo = objectStore.get(info.book)
+    const bookInfo = await getInfo(info.book)
+
+    console.log("bookInfo", bookInfo)
 
     objectStore.put({...bookInfo, ...info})
 
-    return new Promise((resolve, reject) => {
-        transaction.oncomplete = function () {
-            resolve('done')
-        };
-        transaction.onerror = function (e) {
-            reject(e)
-        };
-    })
-
+    return promise(transaction)
 }
 
 async function init() {
@@ -152,6 +148,17 @@ async function init() {
         };
         request.onerror = function () {
             reject('Database failed to open');
+        };
+    })
+}
+
+const promise = request => {
+    return new Promise((resolve, reject) => {
+        request.oncomplete = function (e) {
+            resolve(request.result)
+        };
+        request.onerror = function (e) {
+            reject(request.error)
         };
     })
 }
