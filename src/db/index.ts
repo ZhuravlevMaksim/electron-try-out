@@ -1,11 +1,29 @@
-let instance = undefined
+let instance: IDBDatabase
+
+export interface Info {
+    book: string
+    rows: number
+    row: number
+    translateRow?: number
+}
+
+export interface Row {
+    book: string
+    row: number
+    text: string
+    translation?: string
+}
 
 class Db {
 
     async addBook(book, bookText) {
         return Promise.all([
             putInfo({book, rows: bookText.length, row: 0, translateRow: 0}),
-            addBookText(book, bookText)
+            commonTransaction('book_text', store => {
+                bookText.forEach((text, row) => {
+                    store.add({book, row, text});
+                })
+            })
         ])
     }
 
@@ -47,22 +65,21 @@ class Db {
     }
 
     async addTranslation({book, row, translation}) {
-        await putRow({book, row, translation})
-        await putInfo({book, translateRow: row})
+
+        const info: Info = await commonRequest('book_info', store => {
+            return store.get(book)
+        })
+        await putInfo({...info, book, translateRow: row})
+
+        const bRow: Row = await commonRequest('book_text', store => {
+            return store.get([book, row])
+        })
+        await commonTransaction('book_text', store => {
+            return store.put({...bRow, translation})
+        })
+
     }
 
-}
-
-async function getBookRow(book, row) {
-    const transaction = instance.transaction(['book_text'], 'read');
-    const objectStore = transaction.objectStore('book_text');
-    return promise(objectStore.get([book, row]))
-}
-
-async function getInfo(book) {
-    const transaction = instance.transaction(['book_info'], 'read');
-    const objectStore = transaction.objectStore('book_info');
-    return promise(objectStore.get(book))
 }
 
 async function remove(book) {
@@ -95,40 +112,42 @@ async function remove(book) {
     })
 }
 
-async function addBookText(book, bookText) {
-    const transaction = instance.transaction(['book_text'], 'readwrite');
-    const objectStore = transaction.objectStore('book_text');
+async function putInfo(info: Info) {
+    return commonTransaction('book_info', (store) => {
+        store.put(info)
+    })
+}
 
-    bookText.forEach((text, row) => {
-        objectStore.add({book, row, text});
+async function commonRequest(store, fun: (IDBObjectStore) => IDBRequest): Promise<any> {
+    const transaction = instance.transaction([store], 'readonly');
+
+    const request = fun(transaction.objectStore(store))
+
+    return new Promise((resolve, reject) => {
+        request.onsuccess = function (e) {
+            resolve(request.result)
+        };
+        request.onerror = function (e) {
+            reject(transaction.error)
+        };
     })
 
-    return promise(transaction)
 }
 
-async function putRow(row) {
-    const transaction = instance.transaction(['book_text'], 'readwrite');
-    const objectStore = transaction.objectStore('book_text');
+async function commonTransaction(store, fun) {
+    const transaction = instance.transaction([store], 'readwrite');
 
-    const bookRow = await getBookRow(row.book, row.row)
+    fun(transaction.objectStore(store))
 
-    console.log("bookRow", bookRow)
+    return new Promise((resolve, reject) => {
+        transaction.oncomplete = function (e) {
+            resolve('Done')
+        };
+        transaction.onerror = function (e) {
+            reject(transaction.error)
+        };
+    })
 
-    objectStore.put({...bookRow, ...row})
-    return promise(transaction)
-}
-
-async function putInfo(info) {
-    const transaction = instance.transaction(['book_info'], 'readwrite');
-    const objectStore = transaction.objectStore('book_info');
-
-    const bookInfo = await getInfo(info.book)
-
-    console.log("bookInfo", bookInfo)
-
-    objectStore.put({...bookInfo, ...info})
-
-    return promise(transaction)
 }
 
 async function init() {
@@ -138,7 +157,7 @@ async function init() {
             resolve('Database opened successfully');
             instance = request.result;
         }
-        request.onupgradeneeded = function (e) {
+        request.onupgradeneeded = function (e: any) {
             instance = e.target.result;
 
             instance.createObjectStore('book_text', {keyPath: ['book', 'row']});
@@ -152,21 +171,11 @@ async function init() {
     })
 }
 
-const promise = request => {
-    return new Promise((resolve, reject) => {
-        request.oncomplete = function (e) {
-            resolve(request.result)
-        };
-        request.onerror = function (e) {
-            reject(request.error)
-        };
-    })
-}
-
 Object.getOwnPropertyNames(Db.prototype).forEach((name) => {
     const method = Db.prototype[name];
     Db.prototype[name] = async function () {
         if (instance === undefined) await init()
+        // @ts-ignore
         return method(...arguments)
     };
 });

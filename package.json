@@ -6,7 +6,7 @@
     "@types/react": "^17.0.0",
     "@vitalets/google-translate-api": "^4.0.0",
     "axios": "^0.21.1",
-    "electron": "^11.1.1",
+    "epub": "^1.2.1",
     "node-sass": "4.14.1",
     "pdfreader": "^1.2.8",
     "react": "^17.0.1",
@@ -19,7 +19,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "electron": "electron ."
+    "electron": "electron .",
+    "build:electron": "electron-builder"
   },
   "eslintConfig": {
     "extends": [
@@ -41,6 +42,8 @@
     ]
   },
   "devDependencies": {
-    "react-router-dom": "^5.2.0"
+    "react-router-dom": "^5.2.0",
+    "electron-builder": "22.3.6",
+    "electron": "^11.1.1"
   }
 }

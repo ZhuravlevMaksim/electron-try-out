@@ -1,4 +1,4 @@
-import {db} from "../db";
+import {db, Info} from "../db";
 import {useEffect, useState} from "react";
 
 const {ipcRenderer} = window.require('electron');
@@ -26,7 +26,7 @@ const translator = new class {
     setTranslate({book, translating}) {
         this.state = {...this.state, [book]: {...this.state[book], translating}}
         if (translating) {
-            db.getBooks(book).then((info) => {
+            db.getBooks(book).then((info: any) => {
                 const {rows, translateRow} = info[book]
                 this.state[book] = {...this.state[book], rows, translateRow}
                 this.translate(book)
@@ -45,12 +45,10 @@ const translator = new class {
 
         if (translation) {
             this.state[book] = {...this.state[book], translateRow: row + 1}
-
-            db.addTranslation({book, row, translation})
-
-            Object.values(this.observers).forEach((setter: any) => setter(this.translation))
-
-            this.translate(book)
+            db.addTranslation({book, row, translation}).then(() => {
+                Object.values(this.observers).forEach((setter: any) => setter(this.translation))
+                this.translate(book)
+            }).catch(e => console.error('add translation', e))
         }
     }
 
