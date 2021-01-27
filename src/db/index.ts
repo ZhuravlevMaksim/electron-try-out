@@ -18,7 +18,7 @@ class Db {
 
     async addBook(book, bookText) {
         return Promise.all([
-            putInfo({book, rows: bookText.length, row: 0, translateRow: 0}),
+            putInfo({book, rows: bookText.length - 1, row: 0, translateRow: 0}),
             commonTransaction('book_text', store => {
                 bookText.forEach((text, row) => {
                     store.add({book, row, text});

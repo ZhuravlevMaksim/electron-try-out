@@ -55,11 +55,29 @@ function getEpubText(filename) {
             epub.spine.contents.forEach(({id}, index) => {
                 result[index] = new Promise(res => {
                     epub.getChapter(id, (error, text) => {
-                        res([...text.matchAll(p)].map(match => match[1]).join(' '))
+                        const resp = []
+                        for (const match of text.matchAll(p)) {
+                            const m = match[1].split('.')
+                            if (m.length) {
+                                m.forEach(e => resp.push(e))
+                            }
+                        }
+                        console.log(resp)
+                        res(resp)
                     })
                 })
             })
-            Promise.all(result).then(result => resolve(result.filter(t => t.length)))
+            Promise.all(result).then(result => {
+                const text = []
+                result.forEach(p => {
+                    for (const line of p) {
+                        if (line === '') continue
+                        if (line === '&nbsp;') continue
+                        text.push(line)
+                    }
+                })
+                resolve(text)
+            })
         });
     })
     epub.parse();
@@ -80,9 +98,8 @@ function getPdfText(filename, callback) {
 const translate = require("@vitalets/google-translate-api");
 
 ipcMain.on('translate', async (event, {book, row, text}) => {
-    console.log("main", {book, row, text})
     try {
-        const {text: translation} = await translate(text, {client: 'gtx', to: 'en'})
+        const {text: translation} = await translate(text, {client: 'gtx', to: 'ru'})
         event.reply('translate', {book, row, translation})
     } catch (e) {
         event.reply('translate', {book, row, error: e.message})

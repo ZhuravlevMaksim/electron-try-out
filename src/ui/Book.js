@@ -5,7 +5,7 @@ import {Button} from "./Button";
 
 export const Book = () => {
 
-    const [i, setIndex] = useState(500)
+    const [i, setIndex] = useState(0)
     const [row, setRow] = useState(null)
 
     const {params: {name}} = useRouteMatch()
@@ -16,7 +16,7 @@ export const Book = () => {
 
     return row ? <div className="book">
         <h3>{name}</h3>
-        <div>{row.text}</div>
+        <div >{row.text}</div><br/>
         <div>{row.translation}</div>
         <div className='book-row-navigation'>
             <Button onClick={() => setIndex(i - 1)}>prev</Button>
