@@ -40,16 +40,17 @@ const translator = new class {
 
         if (error) {
             console.error(error)
-            return
+            this.state = {...this.state, [book]: {...this.state[book], translating: false}}
         }
 
         if (translation) {
             this.state[book] = {...this.state[book], translateRow: row + 1}
             db.addTranslation({book, row, translation}).then(() => {
-                Object.values(this.observers).forEach((setter: any) => setter(this.translation))
                 this.translate(book)
             }).catch(e => console.error('add translation', e))
         }
+
+        Object.values(this.observers).forEach((setter: any) => setter(this.translation))
     }
 
     get translation() {

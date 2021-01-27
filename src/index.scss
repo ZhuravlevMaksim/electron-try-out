@@ -10,10 +10,14 @@ html {
 
     &__row {
       display: flex;
+      margin-bottom: 0.5rem;
+
+      &__btn {
+        margin-left: auto;
+      }
 
       &__book {
         border: 1px darkgrey solid;
-        cursor: pointer;
         border-radius: 3px;
 
         margin-left: 1rem;
@@ -30,14 +34,31 @@ html {
         &__name {
           height: 26px;
           font-size: 21px;
+          cursor: pointer;
         }
 
         &__info {
-          text-align: right
-        }
+          display: flex;
+          align-items: flex-end;
+          justify-content: right;
 
-        &:hover {
-          background-color: antiquewhite;
+          .button {
+            padding: 0.2rem;
+            margin: 0.2rem;
+            background-color: white;
+          }
+
+          .button.red {
+            background-color: #fa4f4f;
+          }
+
+          .button + .button {
+            margin-left: 0.5rem;
+          }
+
+          div:last-child{
+            margin-left: auto;
+          }
         }
 
       }

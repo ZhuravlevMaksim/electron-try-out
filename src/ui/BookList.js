@@ -41,27 +41,25 @@ export const BookList = () => {
                 const pending = state === 'pending' || state === 'deleting'
                 return <div key={book} className='books-list__row'>
                     <div className='books-list__row__book'
-                         onClick={() => history.push(`/book/${book}`)}
                          style={pending ? {backgroundColor: 'gray', opacity: 0.5} : null}>
-                        <div className='books-list__row__book__name'>{book}</div>
+                        <div onClick={() => history.push(`/book/${book}`)} className='books-list__row__book__name'>{book}</div>
                         {
                             pending ?
                                 <div className='books-list__row__book__info'>pending...</div> :
                                 <div className='books-list__row__book__info'>
-                                    {`${rows} / ${row} / ${translate[book] && translate[book].translateRow || translateRow}`}
+                                    <TranslateBtn book={book}
+                                                  translateBookList={translate}
+                                                  setTranslate={setTranslate}/>
+                                    <Button red onClick={() => removeBook(book)}>
+                                        remove
+                                    </Button>
+                                    <div>
+                                        {`${rows} / ${row} / ${translate[book] && translate[book].translateRow || translateRow}`}
+                                    </div>
                                 </div>
                         }
                     </div>
-                    {
-                        pending ? null : <div>
-                            <TranslateBtn book={book}
-                                          translateBookList={translate}
-                                          setTranslate={setTranslate}/>
-                            <Button onClick={() => removeBook(book)}>
-                                remove
-                            </Button>
-                        </div>
-                    }
+
                 </div>
             })
         }
@@ -70,7 +68,7 @@ export const BookList = () => {
 
 const TranslateBtn = ({book, translateBookList, setTranslate}) => {
     const {translating = false, rows, translateRow} = translateBookList[book] || {}
-    return rows === undefined || rows !== translateRow ? <Button style={{marginRight: 5}} onClick={() => {
+    return rows === undefined || rows !== translateRow ? <Button onClick={() => {
         setTranslate({book, translating: !translating})
     }}>
         {translating ? 'translating...' : 'translate'}
