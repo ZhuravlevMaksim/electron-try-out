@@ -1,3 +1,5 @@
+import {log} from "../util";
+
 let instance: IDBDatabase
 
 export interface Info {
@@ -80,13 +82,13 @@ class Db {
 
     }
 
-    async updateCurrentPage(book, page) {
-        const info: Info = await commonRequest('book_info', store => {
+    updateCurrentPage(book, page) {
+        commonRequest('book_info', store => {
             return store.get(book)
-        })
-
-        await commonTransaction('book_info', store => {
-            return store.put({...info, row: page})
+        }).then((info: Info) => {
+            commonTransaction('book_info', store => {
+                store.put({...info, row: page})
+            }).then(() => log('Update book_info', book, page))
         })
     }
 
