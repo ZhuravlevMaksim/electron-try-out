@@ -60,7 +60,6 @@ function getEpubText(filename) {
                                 m.forEach(e => resp.push(e))
                             }
                         }
-                        console.log(resp)
                         res(resp)
                     })
                 })
