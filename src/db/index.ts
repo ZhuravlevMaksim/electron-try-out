@@ -80,6 +80,23 @@ class Db {
 
     }
 
+    async updateCurrentPage(book, page) {
+        const info: Info = await commonRequest('book_info', store => {
+            return store.get(book)
+        })
+
+        await commonTransaction('book_info', store => {
+            return store.put({...info, row: page})
+        })
+    }
+
+    async currentPage(book) {
+        const info: Info = await commonRequest('book_info', store => {
+            return store.get(book)
+        })
+        return info.row
+    }
+
 }
 
 async function remove(book) {

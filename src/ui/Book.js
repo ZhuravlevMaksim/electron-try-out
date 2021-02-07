@@ -5,14 +5,21 @@ import {Button} from "./Button";
 
 export const Book = () => {
 
-    const [i, setIndex] = useState(0)
+    const [i, setIndex] = useState(undefined)
     const [row, setRow] = useState(null)
 
     const {params: {name}} = useRouteMatch()
 
     useEffect(() => {
-        db.getBookRow(name, i).then((row) => setRow(row))
+        if (i !== undefined){
+            db.getBookRow(name, i).then((row) => setRow(row))
+            db.updateCurrentPage(name, i)
+        }
     }, [i])
+
+    useEffect(() => {
+        db.currentPage(name).then(setIndex)
+    }, [])
 
     return row ? <div className="book">
         <h3>{name}</h3>

@@ -36,8 +36,6 @@ const translator = new class {
 
     private receive({book, row, translation, error}) {
 
-        console.log({book, row, translation, error})
-
         if (error) {
             console.error(error)
             this.state = {...this.state, [book]: {...this.state[book], translating: false}}
