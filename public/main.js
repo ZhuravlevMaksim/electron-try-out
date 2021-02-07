@@ -37,9 +37,7 @@ app.on('activate', () => {
 
 ipcMain.on('add-book', (event, arg) => {
     event.reply('add-book', {book: arg.name, state: 'pending'})
-    if (arg.name.endsWith(".pdf")) {
-        getPdfText(arg.path, text => event.reply('add-book', {book: arg.name, text}))
-    } else if (arg.name.endsWith(".epub")) {
+    if (arg.name.endsWith(".epub")) {
         getEpubText(arg.path).then(text => event.reply('add-book', {book: arg.name, text}))
     }
 })
@@ -83,16 +81,6 @@ function getEpubText(filename) {
     epub.parse();
 
     return promise
-}
-
-const PdfReader = require("pdfreader").PdfReader;
-
-function getPdfText(filename, callback) {
-    const text = []
-    new PdfReader().parseFileItems(filename, function (err, item) {
-        if (item === undefined) callback(text)
-        else if (item.x) text.push(item.text);
-    });
 }
 
 const translate = require("@vitalets/google-translate-api");
