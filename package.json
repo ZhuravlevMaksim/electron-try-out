@@ -1,5 +1,6 @@
 {
-  "name": "oracion",
+  "name": "electron-try-out",
+  "author": "m.zhuravlev",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -19,7 +20,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron": "electron .",
-    "build:electron": "electron-builder"
+    "build:electron": "electron-builder build --publish never",
+    "build:react:electron": "yarn build && electron-builder build --publish never"
   },
   "eslintConfig": {
     "extends": [
@@ -27,7 +29,6 @@
       "react-app/jest"
     ]
   },
-  "main": "public/main.js",
   "browserslist": {
     "production": [
       ">0.2%",
@@ -44,5 +45,24 @@
     "react-router-dom": "^5.2.0",
     "electron-builder": "22.3.6",
     "electron": "^11.1.1"
+  },
+  "main": "public/main.js",
+  "homepage": "./",
+  "build": {
+    "productName": "oracion",
+    "appId": "electron-try-out-desktop",
+    "extends": null,
+    "extraMetadata": {
+      "main": "build/main.js"
+    },
+    "files": [
+      "build/"
+    ],
+    "win": {
+      "artifactName": "${name}-win-${version}.${ext}",
+      "target": [
+        "dir"
+      ]
+    }
   }
 }

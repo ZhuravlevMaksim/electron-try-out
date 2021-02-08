@@ -1,9 +1,9 @@
 const {app, ipcMain, BrowserWindow} = require('electron')
 const path = require('path')
 
-const entryUrl = process.env.NODE_ENV !== 'production'
-    ? 'http://localhost:3000'
-    : `file://${path.join(__dirname, 'index.html')}`;
+const entryUrl = app.isPackaged
+    ? `file://${path.join(__dirname, 'index.html')}`
+    : 'http://localhost:3000';
 
 function createWindow() {
     const win = new BrowserWindow({
@@ -17,8 +17,7 @@ function createWindow() {
     })
 
     win.loadURL(entryUrl);
-    // mainWindow.loadFile('index.html')
-    win.webContents.openDevTools()
+    !app.isPackaged && win.webContents.openDevTools()
 }
 
 app.whenReady().then(createWindow)

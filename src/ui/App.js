@@ -21,7 +21,7 @@ function App() {
                 <BookList/>
             </Route>
             <Route path="/book/:name">
-                <Button onClick={history.goBack}>back</Button>
+                <Button onClick={() => history.push('../books')}>books</Button>
                 <Book/>
             </Route>
         </Switch>
