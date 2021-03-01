@@ -5,8 +5,7 @@
   "private": true,
   "dependencies": {
     "@types/react": "^17.0.0",
-    "@vitalets/google-translate-api": "^4.0.0",
-    "axios": "^0.21.1",
+    "@vitalets/google-translate-api": "^5.0.0",
     "epub": "^1.2.1",
     "node-sass": "4.14.1",
     "react": "^17.0.1",
