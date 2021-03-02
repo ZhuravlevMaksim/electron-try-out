@@ -19,8 +19,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron": "electron .",
-    "build:electron": "electron-builder build --publish never",
-    "build:react:electron": "yarn build && electron-builder build --publish never"
+    "build:electron": "electron-builder build --publish=never --win --ia32",
+    "build:react:electron": "yarn build && yarn run build:electron"
   },
   "eslintConfig": {
     "extends": [
