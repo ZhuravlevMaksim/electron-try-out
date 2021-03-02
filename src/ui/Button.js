@@ -1,8 +1,8 @@
-export const Button = ({onClick, children, red}) => {
+export const Button = ({onClick, hide = false, children, red}) => {
 
     const style = red ? 'red' : ''
 
-    return <div onClick={onClick} className={`button ${style}`}>
+    return <div onClick={onClick} className={`button ${style} ${hide ? 'hidden': ''}`}>
         {children}
     </div>
 }

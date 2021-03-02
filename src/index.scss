@@ -56,7 +56,7 @@ html {
             margin-left: 0.5rem;
           }
 
-          div:last-child{
+          div:last-child {
             margin-left: auto;
           }
         }
@@ -68,12 +68,22 @@ html {
   .book {
     .book-row-navigation {
       display: flex;
-      margin-top: 1rem;
-
-      .button + .button {
-        margin-left: 1rem;
-      }
+      margin: 2rem 1rem 1rem;
+      align-items: center;
+      justify-content: space-between;
     }
+
+    &__text {
+      font-size: 30px;
+    }
+
+    .button{
+      width: 150px;
+    }
+  }
+
+  .hidden{
+    opacity: 0;
   }
 
   .button {
@@ -81,7 +91,6 @@ html {
     background-color: #e0e0e0;
     border-radius: 3px;
     border: 1px solid #e0e0e0;
-    width: fit-content;
     cursor: pointer;
     user-select: none;
 
