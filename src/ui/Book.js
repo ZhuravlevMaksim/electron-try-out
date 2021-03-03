@@ -27,7 +27,6 @@ export const Book = () => {
             <div>{row.translation}</div>
             <br/>
             <br/>
-            <br/>
             <div >{row.text}</div>
         </div>
         <div className='book-row-navigation'>
