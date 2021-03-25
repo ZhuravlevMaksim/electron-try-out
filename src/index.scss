@@ -1,6 +1,18 @@
 html {
-  .App {
+  height: 100%;
+  body {
+    margin: 0;
+    height: 100%;
 
+    #root{
+      height: 100%;
+    }
+  }
+
+  .App {
+    height: 100%;
+    display: flex;
+    flex-flow: column;
   }
 
   .books-list {
@@ -19,6 +31,7 @@ html {
       &__book {
         border: 1px darkgrey solid;
         border-radius: 3px;
+
 
         margin-left: 1rem;
         margin-right: 1rem;
@@ -66,9 +79,16 @@ html {
   }
 
   .book {
+
+    flex: 0 1 auto;
+    height: 100%;
+
+    display: flex;
+    flex-flow: column;
+
     .book-row-navigation {
       display: flex;
-      margin: 2rem 1rem 1rem;
+      margin: auto 1rem 3rem;
       align-items: center;
       justify-content: space-between;
     }

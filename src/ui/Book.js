@@ -31,6 +31,11 @@ export const Book = () => {
         </div>
         <div className='book-row-navigation'>
             <Button hide={i === 0} onClick={() => setIndex(i - 1)}>prev</Button>
+            <div style={{display: 'flex'}}>
+                <Button hide={i <= 0} onClick={() => setIndex(i - 100)}>-100</Button>
+                <div style={{width: 10}}/>
+                <Button hide={false} onClick={() => setIndex(i  + 100)}>+100</Button>
+            </div>
             <Button onClick={() => setIndex(i + 1)}>next</Button>
         </div>
     </div> : null
