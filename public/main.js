@@ -54,9 +54,8 @@ function getEpubText(filename) {
                     epub.getChapter(id, (error, text) => {
                         const resp = []
                         for (const match of text.matchAll(p)) {
-                            const m = match[1].split('.')
-                            if (m.length) {
-                                m.forEach(e => resp.push(e))
+                            if (match[1].length) {
+                                resp.push(match[1])
                             }
                         }
                         res(resp)
@@ -67,7 +66,7 @@ function getEpubText(filename) {
                 const text = []
                 result.forEach(p => {
                     for (const line of p) {
-                        if (line === '') continue
+                        if (line.length <= 1) continue
                         if (line === '&nbsp;') continue
                         text.push(line)
                     }

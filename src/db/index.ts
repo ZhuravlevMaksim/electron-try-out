@@ -92,11 +92,11 @@ class Db {
         })
     }
 
-    async currentPage(book) {
+    async boonInfo(book) {
         const info: Info = await commonRequest('book_info', store => {
             return store.get(book)
         })
-        return info.row
+        return info
     }
 
 }
