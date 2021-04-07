@@ -26,23 +26,26 @@ export const Book = () => {
         info && setIndex(info.row)
     }, [info])
 
-    return row ? <div className="book">
+    return  <div className="book">
         <h3>{name}</h3>
-        <div className="book__text">
-            <div>{row.translation}</div>
-            <br/>
-            <br/>
-            <div >{row.text}</div>
-        </div>
+        {
+            row ?
+                <div className="book__text">
+                    <div>{row.translation}</div>
+                    <br/>
+                    <br/>
+                    <div >{row.text}</div>
+                </div>
+                : null
+        }
         <div className='book-row-navigation'>
-            <Button hide={i === 0} onClick={() => setIndex(i - 1)}>prev</Button>
+            <Button hide={i <= 0} onClick={() => setIndex(i - 1)}>prev</Button>
             <div style={{display: 'flex'}}>
                 <Button hide={i <= 0 || i < 100} onClick={() => setIndex(i - 100)}>-100</Button>
                 <div style={{width: 10}}/>
-                <Button hide={i + 100 > info.rows} onClick={() => setIndex(i  + 100)}>+100</Button>
+                <Button hide={i + 100 > info ? info.rows  : 0} onClick={() => setIndex(i  + 100)}>+100</Button>
             </div>
             <Button onClick={() => setIndex(i + 1)}>next</Button>
         </div>
-    </div> : null
-
+    </div>
 }
