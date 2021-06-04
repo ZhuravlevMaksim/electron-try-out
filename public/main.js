@@ -43,20 +43,19 @@ ipcMain.on('add-book', (event, arg) => {
 
 const EpubReader = require("epub");
 
+// require('child_process').spawn('clip').stdin.end(text)
 function getEpubText(filename) {
     const epub = new EpubReader(filename)
     const promise = new Promise(resolve => {
         const result = []
-        const p = /<p.*>(.*)<\/p>/g;
         epub.on('end', function () {
             epub.spine.contents.forEach(({id}, index) => {
                 result[index] = new Promise(res => {
                     epub.getChapter(id, (error, text) => {
                         const resp = []
-                        for (const match of text.matchAll(p)) {
-                            if (match[1].length) {
-                                resp.push(match[1])
-                            }
+                        for (let result of text.matchAll(/<p[^>]*>(.*?|[\s\S]*?)<\/p>/g)) {
+                            const p = result[1].replaceAll(/\r?\n|\r/g, ' ').replaceAll(/<.+?>/g, '')
+                            resp.push(p)
                         }
                         res(resp)
                     })
@@ -66,7 +65,7 @@ function getEpubText(filename) {
                 const text = []
                 result.forEach(p => {
                     for (const line of p) {
-                        if (line.length <= 1) continue
+                        if (line.length <= 2) continue
                         if (line === '&nbsp;') continue
                         text.push(line)
                     }

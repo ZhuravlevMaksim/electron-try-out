@@ -15,11 +15,10 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "build": "cross-env GENERATE_SOURCEMAP=false react-scripts build",
     "electron": "electron .",
-    "build:electron": "electron-builder build --publish=never --win --ia32",
+    "build:electron:32": "electron-builder build --publish=never --win --ia32",
+    "build:electron:64": "electron-builder build --publish=never --win",
     "build:react:electron": "yarn build && yarn run build:electron"
   },
   "eslintConfig": {
@@ -43,7 +42,8 @@
   "devDependencies": {
     "react-router-dom": "^5.2.0",
     "electron-builder": "22.3.6",
-    "electron": "^11.1.1"
+    "electron": "^11.1.1",
+    "cross-env": "^7.0.3"
   },
   "main": "public/main.js",
   "homepage": "./",
