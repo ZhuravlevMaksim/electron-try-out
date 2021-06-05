@@ -18,8 +18,7 @@
     "build": "cross-env GENERATE_SOURCEMAP=false react-scripts build",
     "electron": "electron .",
     "build:electron:32": "electron-builder build --publish=never --win --ia32",
-    "build:electron:64": "electron-builder build --publish=never --win",
-    "build:react:electron": "yarn build && yarn run build:electron"
+    "build:electron:64": "electron-builder build --publish=never --win"
   },
   "eslintConfig": {
     "extends": [
