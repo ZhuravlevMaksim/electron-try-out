@@ -89,3 +89,35 @@ ipcMain.on('translate', async (event, {book, row, text}) => {
         event.reply('translate', {book, row, error: e.message})
     }
 })
+
+const clickWindow = {
+    win: null
+}
+
+ipcMain.on('click-translate', async (event, text) => {
+    if (clickWindow.win === null){
+        clickWindow.win =  new BrowserWindow({
+            center: true,
+            resizable: true,
+            webPreferences: {
+                nodeIntegration: false,
+                show: false
+            }
+        });
+
+        clickWindow.win.setMenuBarVisibility(false)
+        clickWindow.win.maximize();
+        clickWindow.win.loadURL(`https://translate.google.com/?hl=ru&sl=en&tl=ru&text=${text}&op=translate`);
+        clickWindow.win.once('ready-to-show', () => {
+            clickWindow.win.show()
+        });
+        clickWindow.win.once('closed', () => {
+            clickWindow.win = null
+            console.log(clickWindow)
+        });
+    }else {
+        clickWindow.win.loadURL(`https://translate.google.com/?hl=ru&sl=en&tl=ru&text=${text}&op=translate`);
+    }
+
+
+})

@@ -3,6 +3,8 @@ import {db} from "../db";
 import {useRouteMatch} from "react-router-dom";
 import {Button} from "./Button";
 
+const {ipcRenderer} = window.require('electron');
+
 export const Book = () => {
 
     const [info, setInfo] = useState(undefined)
@@ -12,7 +14,7 @@ export const Book = () => {
     const {params: {name}} = useRouteMatch()
 
     useEffect(() => {
-        if (i !== undefined){
+        if (i !== undefined) {
             db.getBookRow(name, i).then((row) => setRow(row))
             db.updateCurrentPage(name, i)
         }
@@ -26,7 +28,7 @@ export const Book = () => {
         info && setIndex(info.row)
     }, [info])
 
-    return  <div className="book">
+    return <div className="book">
         <h3>{name}</h3>
         {
             row ?
@@ -34,7 +36,7 @@ export const Book = () => {
                     <div>{row.translation}</div>
                     <br/>
                     <br/>
-                    <div >{row.text}</div>
+                    <div onClick={e => ipcRenderer.send('click-translate', e.target.outerText)}>{row.text}</div>
                 </div>
                 : null
         }
@@ -43,7 +45,7 @@ export const Book = () => {
             <div style={{display: 'flex'}}>
                 <Button hide={i <= 0 || i < 100} onClick={() => setIndex(i - 100)}>-100</Button>
                 <div style={{width: 10}}/>
-                <Button hide={i + 100 > info ? info.rows  : 0} onClick={() => setIndex(i  + 100)}>+100</Button>
+                <Button hide={i + 100 > info ? info.rows : 0} onClick={() => setIndex(i + 100)}>+100</Button>
             </div>
             <Button onClick={() => setIndex(i + 1)}>next</Button>
         </div>
