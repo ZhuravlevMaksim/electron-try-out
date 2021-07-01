@@ -118,6 +118,10 @@ ipcMain.on('click-translate', async (event, text) => {
     }else {
         clickWindow.win.loadURL(`https://translate.google.com/?hl=ru&sl=en&tl=ru&text=${text}&op=translate`);
     }
+})
 
-
+ipcMain.on('next-translate', async (event, text) => {
+    if (clickWindow.win){
+        clickWindow.win.loadURL(`https://translate.google.com/?hl=ru&sl=en&tl=ru&text=${text}&op=translate`);
+    }
 })

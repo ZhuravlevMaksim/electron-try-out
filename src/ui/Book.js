@@ -28,6 +28,23 @@ export const Book = () => {
         info && setIndex(info.row)
     }, [info])
 
+    useEffect(() => {
+        row && row.text && ipcRenderer.send('next-translate', row.text)
+    }, [row])
+
+    useEffect(() => {
+        const fun = function (e) {
+            if (e.key === 'ArrowRight') {
+                setIndex(i + 1)
+            }
+            if (e.key === 'ArrowLeft') {
+                setIndex(i - 1)
+            }
+        }
+        document.addEventListener('keydown', fun)
+        return () => document.removeEventListener('keydown', fun)
+    }, [i])
+
     return <div className="book">
         <h3>{name}</h3>
         {
