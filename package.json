@@ -18,7 +18,8 @@
     "build": "cross-env GENERATE_SOURCEMAP=false react-scripts build",
     "electron": "electron .",
     "build:electron:32": "electron-builder build --publish=never --win --ia32",
-    "build:electron:64": "electron-builder build --publish=never --win"
+    "build:electron:64": "electron-builder build --publish=never --win",
+    "watch": "concurrently \"npm start\" \"electron .\""
   },
   "eslintConfig": {
     "extends": [
@@ -42,7 +43,8 @@
     "react-router-dom": "^5.2.0",
     "electron-builder": "22.3.6",
     "electron": "^11.1.1",
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "concurrently": "3.1.0"
   },
   "main": "public/main.js",
   "homepage": "./",
