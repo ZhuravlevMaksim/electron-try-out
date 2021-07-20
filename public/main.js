@@ -91,12 +91,16 @@ ipcMain.on('translate', async (event, {book, row, text}) => {
 })
 
 const clickWindow = {
-    win: null
+    win: null,
+    loadURL(text) {
+        // this?.win?.loadURL(`https://translate.google.com/?hl=ru&sl=en&tl=ru&text=${text}&op=translate`)
+        this?.win?.loadURL(`https://translate.yandex.ru/?lang=en-ru&text=${text}`)
+    }
 }
 
 ipcMain.on('click-translate', async (event, text) => {
-    if (clickWindow.win === null){
-        clickWindow.win =  new BrowserWindow({
+    if (clickWindow.win === null) {
+        clickWindow.win = new BrowserWindow({
             center: true,
             resizable: true,
             webPreferences: {
@@ -107,21 +111,20 @@ ipcMain.on('click-translate', async (event, text) => {
 
         clickWindow.win.setMenuBarVisibility(false)
         clickWindow.win.maximize();
-        clickWindow.win.loadURL(`https://translate.google.com/?hl=ru&sl=en&tl=ru&text=${text}&op=translate`);
+        clickWindow?.loadURL(text);
         clickWindow.win.once('ready-to-show', () => {
             clickWindow.win.show()
         });
         clickWindow.win.once('closed', () => {
             clickWindow.win = null
-            console.log(clickWindow)
         });
-    }else {
-        clickWindow.win.loadURL(`https://translate.google.com/?hl=ru&sl=en&tl=ru&text=${text}&op=translate`);
+    } else {
+        clickWindow?.loadURL(text);
     }
 })
 
 ipcMain.on('next-translate', async (event, text) => {
-    if (clickWindow.win){
-        clickWindow.win.loadURL(`https://translate.google.com/?hl=ru&sl=en&tl=ru&text=${text}&op=translate`);
+    if (clickWindow.win) {
+        clickWindow.loadURL(text);
     }
 })
